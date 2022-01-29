@@ -9,6 +9,14 @@ Test
     Keyword
     One More
 
+Golden test
+    [Documentation]  This is doc
+    Pass
+
+Templated test
+    [Template]  Templated keyword
+    Pass
+
 
 *** Keywords ***
 Keyword

@@ -324,3 +324,7 @@ def get_section_name(node):
         elif "HEADER" in token.type:
             return token.value
     return ""
+
+
+def str2bool(value: str) -> bool:
+    return value.lower() in ("true", "yes")

@@ -2,10 +2,11 @@
 Documentation checkers
 """
 from robot.parsing.model.blocks import SettingSection
-from robot.parsing.model.statements import Documentation
+from robot.parsing.model.statements import Documentation, Template
 
 from robocop.checkers import VisitorChecker
-from robocop.rules import Rule, RuleSeverity
+from robocop.rules import Rule, RuleSeverity, RuleParam
+from robocop.utils.misc import str2bool
 
 rules = {
     "0201": Rule(
@@ -15,6 +16,12 @@ rules = {
         severity=RuleSeverity.WARNING,
     ),
     "0202": Rule(
+        RuleParam(
+            name="ignore_templated",
+            default="True",
+            converter=str2bool,
+            desc="",  # TODO
+        ),
         rule_id="0202",
         name="missing-doc-test-case",
         msg="Missing documentation in '{{ name }}' test case",
@@ -40,6 +47,11 @@ class MissingDocumentationChecker(VisitorChecker):
             return
         self.check_if_docs_are_present(node, "missing-doc-keyword")
 
+    def visit_TestCaseSection(self, node):  # noqa
+        if self.templated_suite and self.param("missing-doc-test-case", "ignore_templated"):
+            return
+        self.generic_visit(node)
+
     def visit_TestCase(self, node):  # noqa
         self.check_if_docs_are_present(node, "missing-doc-test-case")
 
@@ -56,7 +68,7 @@ class MissingDocumentationChecker(VisitorChecker):
 
     def check_if_docs_are_present(self, node, msg):
         for statement in node.body:
-            if isinstance(statement, Documentation):
+            if isinstance(statement, (Documentation, Template)):
                 break
         else:
             if hasattr(node, "name"):
